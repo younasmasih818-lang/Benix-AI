@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Benix AI</title>
+<style>
+:root{
+  --bg:#0a0a0f;
+  --panel:rgba(255,255,255,0.06);
+  --border:rgba(255,255,255,0.12);
+  --text:#e8e8f0;
+  --muted:#8d8da3;
+  --green:#00e5a0;
+  --cyan:#00c8ff;
+  --danger:#ff4466;
+  --purple:#c084fc;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:Arial, sans-serif;
+  background:
+    radial-gradient(circle at top left,rgba(0,229,160,.12),transparent 35%),
+    radial-gradient(circle at bottom right,rgba(0,200,255,.10),transparent 35%),
+    var(--bg);
+  color:var(--text);
+  height:100vh;
+  overflow:hidden;
+}
+.app{
+  display:flex;
+  height:100vh;
+  width:100%;
+}
+.sidebar{
+  width:64px;
+  background:rgba(5,5,12,.9);
+  border-right:1px solid var(--border);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:14px 8px;
+  gap:10px;
+}
+.logo{
+  width:42px;
+  height:42px;
+  border-radius:14px;
+  background:linear-gradient(135deg,var(--green),var(--cyan));
+  color:#06100d;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:900;
+  font-size:22px;
+  box-shadow:0 0 28px rgba(0,229,160,.35);
+  margin-bottom:8px;
+}
+.nav{
+  width:44px;
+  height:44px;
+  border:0;
+  border-radius:14px;
+  background:transparent;
+  color:var(--muted);
+  font-size:20px;
+  cursor:pointer;
+}
+.nav.active,.nav:hover{
+  background:rgba(0,229,160,.12);
+  color:var(--green);
+}
+.main{
+  flex:1;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+.header{
+  padding:16px 18px;
+  border-bottom:1px solid var(--border);
+  background:rgba(5,5,12,.55);
+  backdrop-filter:blur(14px);
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.header h1{
+  font-size:21px;
+}
+.header small{
+  color:var(--muted);
+  display:block;
+  margin-top:2px;
+}
+.badge{
+  margin-left:auto;
+  padding:6px 12px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background:var(--panel);
+  font-size:12px;
+  color:var(--green);
+}
+.page{
+  display:none;
+  flex:1;
+  overflow:hidden;
+}
+.page.active{
+  display:flex;
+  flex-direction:column;
+}
+.chat{
+  flex:1;
+  overflow-y:auto;
+  padding:18px;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+.bubble{
+  max-width:86%;
+  padding:13px 15px;
+  border-radius:18px;
+  line-height:1.55;
+  font-size:14px;
+  animation:pop .25s ease;
+}
+@keyframes pop{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.ai{
+  align-self:flex-start;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-bottom-left-radius:5px;
+}
+.user{
+  align-self:flex-end;
+  background:linear-gradient(135deg,rgba(0,229,160,.22),rgba(0,200,255,.16));
+  border:1px solid rgba(0,229,160,.25);
+  border-bottom-right-radius:5px;
+}
+.label{
+  font-size:11px;
+  font-weight:bold;
+  margin-bottom:6px;
+  color:var(--green);
+}
+.ai .label{color:var(--cyan)}
+.bubble pre{
+  background:rgba(0,0,0,.35);
+  padding:10px;
+  border-radius:10px;
+  overflow:auto;
+  margin:8px 0;
+}
+.bubble code{
+  color:var(--green);
+}
+.inputArea{
+  padding:14px;
+  border-top:1px solid var(--border);
+  background:rgba(5,5,12,.75);
+}
+.inputBox{
+  display:flex;
+  gap:8px;
+  align-items:flex-end;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:8px;
+}
+textarea{
+  flex:1;
+  resize:none;
+  border:0;
+  outline:0;
+  background:transparent;
+  color:var(--text);
+  min-height:38px;
+  max-height:120px;
+  font-size:14px;
+  padding:9px;
+  font-family:Arial, sans-serif;
+}
+.iconBtn{
+  width:42px;
+  height:42px;
+  border:0;
+  border-radius:13px;
+  background:rgba(255,255,255,.08);
+  color:var(--text);
+  font-size:18px;
+  cursor:pointer;
+}
+.send{
+  background:linear-gradient(135deg,var(--green),var(--cyan));
+  color:#06100d;
+  font-weight:bold;
+}
+.send:disabled{
+  opacity:.5;
+}
+.content{
+  flex:1;
+  overflow-y:auto;
+  padding:18px;
+}
+.card{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:22px;
+  padding:20px;
+  margin-bottom:14px;
+}
+.card h2{
+  margin-bottom:8px;
+}
+.card p,.card li{
+  color:var(--muted);
+  line-height:1.65;
+  font-size:14px;
+}
+.input{
+  width:100%;
+  padding:13px;
+  border-radius:14px;
+  border:1px solid var(--border);
+  background:rgba(0,0,0,.25);
+  color:var(--text);
+  outline:none;
+  margin-top:10px;
+}
+.primary{
+  margin-top:12px;
+  padding:12px 18px;
+  border:0;
+  border-radius:14px;
+  background:linear-gradient(135deg,var(--green),var(--cyan));
+  color:#06100d;
+  font-weight:bold;
+  cursor:pointer;
+}
+.plans{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:14px;
+}
+.price{
+  font-size:34px;
+  font-weight:900;
+  margin:10px 0;
+}
+.planCard{
+  position:relative;
+}
+.planCard.popular{
+  border-color:rgba(0,229,160,.35);
+  box-shadow:0 0 40px rgba(0,229,160,.08);
+}
+.planCard.pro{
+  border-color:rgba(192,132,252,.35);
+}
+.tag{
+  position:absolute;
+  top:14px;
+  right:14px;
+  padding:4px 10px;
+  border-radius:999px;
+  font-size:11px;
+  background:rgba(0,229,160,.12);
+  color:var(--green);
+}
+.welcome{
+  position:fixed;
+  inset:0;
+  background:var(--bg);
+  z-index:9;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+.welcomeBox{
+  max-width:420px;
+  text-align:center;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:28px;
+  padding:32px 24px;
+  box-shadow:0 0 60px rgba(0,229,160,.12);
+}
+.bigLogo{
+  width:84px;
+  height:84px;
+  margin:0 auto 18px;
+  border-radius:24px;
+  background:linear-gradient(135deg,var(--green),var(--cyan));
+  color:#06100d;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:42px;
+  font-weight:900;
+  box-shadow:0 0 50px rgba(0,229,160,.35);
+}
+.gradient{
+  background:linear-gradient(135deg,var(--green),var(--cyan));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.hide{display:none}
+.toast{
+  position:fixed;
+  top:16px;
+  right:16px;
+  background:#111120;
+  border:1px solid var(--border);
+  padding:12px 16px;
+  border-radius:14px;
+  z-index:20;
+  color:var(--text);
+  box-shadow:0 10px 30px rgba(0,0,0,.3);
+}
+@media(max-width:650px){
+  .sidebar{width:58px}
+  .bubble{max-width:94%}
+  .header h1{font-size:18px}
+}
+</style>
+</head>
+<body>
+
+<div class="welcome" id="welcome">
+  <div class="welcomeBox">
+    <div class="bigLogo">B</div>
+    <h1>Welcome to <span class="gradient">Benix AI</span></h1>
+    <p style="color:#8d8da3;line-height:1.6;margin-top:10px">
+      Your smart AI assistant for chat, learning, ideas and productivity.
+    </p>
+    <button class="primary" onclick="enterApp()">Get Started ✨</button>
+  </div>
+</div>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="logo">B</div>
+    <button class="nav active" onclick="openPage('chat',this)">💬</button>
+    <button class="nav" onclick="openPage('pricing',this)">💎</button>
+    <button class="nav" onclick="openPage('settings',this)">⚙️</button>
+    <button class="nav" onclick="openPage('about',this)">ℹ️</button>
+  </aside>
+
+  <main class="main">
+    <div class="header">
+      <div>
+        <h1>Benix AI</h1>
+        <small>Powered by Google Gemini</small>
+      </div>
+      <div class="badge" id="planBadge">Free Plan</div>
+    </div>
+
+    <section class="page active" id="chat">
+      <div class="chat" id="chatBox"></div>
+      <div class="inputArea">
+        <div class="inputBox">
+          <textarea id="message" placeholder="Message Benix AI..."></textarea>
+          <button class="iconBtn" onclick="startVoice()">🎙️</button>
+          <button class="iconBtn send" id="sendBtn" onclick="sendMessage()">➤</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="pricing">
+      <div class="content">
+        <div class="card">
+          <h2>Choose Your Plan</h2>
+          <p>Upgrade Benix AI according to your needs.</p>
+        </div>
+
+        <div class="plans">
+          <div class="card planCard">
+            <span class="tag">Current</span>
+            <h2>Free</h2>
+            <div class="price">$0</div>
+            <ul>
+              <li>20 messages per day</li>
+              <li>Basic AI chat</li>
+              <li>Community support</li>
+            </ul>
+            <button class="primary" onclick="setPlan('Free Plan')">Use Free</button>
+          </div>
+
+          <div class="card planCard popular">
+            <span class="tag">Popular</span>
+            <h2>Basic</h2>
+            <div class="price">$6.9</div>
+            <ul>
+              <li>200 messages per day</li>
+              <li>Faster AI responses</li>
+              <li>Voice input support</li>
+            </ul>
+            <button class="primary" onclick="setPlan('Basic Plan')">Upgrade Basic</button>
+          </div>
+
+          <div class="card planCard pro">
+            <span class="tag" style="color:#c084fc;background:rgba(192,132,252,.13)">Pro</span>
+            <h2>Pro</h2>
+            <div class="price">$14</div>
+            <ul>
+              <li>Unlimited messages</li>
+              <li>Priority AI access</li>
+              <li>Premium features</li>
+            </ul>
+            <button class="primary" onclick="setPlan('Pro Plan')">Upgrade Pro</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="settings">
+      <div class="content">
+        <div class="card">
+          <h2>API Settings</h2>
+          <p>Paste your Gemini API key here. It will save only in your browser.</p>
+          <input class="input" id="apiKey" type="password" placeholder="Paste Gemini API key here">
+          <button class="primary" onclick="saveKey()">Save API Key</button>
+        </div>
+
+        <div class="card">
+          <h2>Chat Controls</h2>
+          <p>Clear chat history and start fresh.</p>
+          <button class="primary" onclick="clearChat()">Clear Chat</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="about">
+      <div class="content">
+        <div class="card">
+          <h2>About Benix AI</h2>
+          <p>
+            Benix AI is a premium AI assistant built with a futuristic dark glass UI.
+            This version supports real Gemini AI chat using your own API key.
+          </p>
+        </div>
+        <div class="card">
+          <h2>Next Updates</h2>
+          <ul>
+            <li>PDF analysis</li>
+            <li>Image analysis</li>
+            <li>Image generation</li>
+            <li>Play Store APK</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+let apiKey = localStorage.getItem("BENIX_GEMINI_KEY") || "";
+let plan = localStorage.getItem("BENIX_PLAN") || "Free Plan";
+let messagesToday = Number(localStorage.getItem("BENIX_MSGS") || 0);
+
+const chatBox = document.getElementById("chatBox");
+const input = document.getElementById("message");
+const sendBtn = document.getElementById("sendBtn");
+const planBadge = document.getElementById("planBadge");
+
+planBadge.textContent = plan;
+document.getElementById("apiKey").value = apiKey;
+
+function enterApp(){
+  document.getElementById("welcome").classList.add("hide");
+  if(chatBox.children.length === 0){
+    addMessage("ai","Hey! I am **Benix AI**. Add your Gemini API key in Settings, then ask me anything.");
+  }
+}
+
+function openPage(id,btn){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.querySelectorAll(".nav").forEach(n=>n.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  btn.classList.add("active");
+}
+
+function toast(msg){
+  const t=document.createElement("div");
+  t.className="toast";
+  t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),2500);
+}
+
+function formatText(text){
+  return text
+    .replace(/```([\s\S]*?)```/g,"<pre><code>$1</code></pre>")
+    .replace(/\*\*(.*?)\*\*/g,"<b>$1</b>")
+    .replace(/\n/g,"<br>");
+}
+
+function addMessage(role,text){
+  const div=document.createElement("div");
+  div.className="bubble "+(role==="user"?"user":"ai");
+  div.innerHTML=`<div class="label">${role==="user"?"You":"Benix AI"}</div>${formatText(text)}`;
+  chatBox.appendChild(div);
+  chatBox.scrollTop=chatBox.scrollHeight;
+}
+
+input.addEventListener("input",()=>{
+  input.style.height="auto";
+  input.style.height=Math.min(input.scrollHeight,120)+"px";
+});
+
+input.addEventListener("keydown",(e)=>{
+  if(e.key==="Enter" && !e.shiftKey){
+    e.preventDefault();
+    sendMessage();
+  }
+});
+
+function saveKey(){
+  apiKey=document.getElementById("apiKey").value.trim();
+  if(!apiKey){
+    toast("API key empty hai");
+    return;
+  }
+  localStorage.setItem("BENIX_GEMINI_KEY",apiKey);
+  toast("API key saved successfully");
+}
+
+function setPlan(p){
+  plan=p;
+  localStorage.setItem("BENIX_PLAN",p);
+  planBadge.textContent=p;
+  toast(p+" activated");
+}
+
+function clearChat(){
+  chatBox.innerHTML="";
+  messagesToday=0;
+  localStorage.setItem("BENIX_MSGS","0");
+  addMessage("ai","Chat cleared. Fresh start!");
+}
+
+async function sendMessage(){
+  const text=input.value.trim();
+  if(!text)return;
+
+  if(!apiKey){
+    toast("Pehle Settings mein API key save karo");
+    openPage("settings",document.querySelectorAll(".nav")[2]);
+    return;
+  }
+
+  if(plan==="Free Plan" && messagesToday>=20){
+    toast("Free limit reached. Upgrade plan.");
+    return;
+  }
+
+  addMessage("user",text);
+  input.value="";
+  input.style.height="auto";
+  messagesToday++;
+  localStorage.setItem("BENIX_MSGS",String(messagesToday));
+
+  sendBtn.disabled=true;
+  addMessage("ai","Thinking...");
+
+  try{
+    const reply=await callGemini(text);
+    chatBox.lastChild.remove();
+    addMessage("ai",reply);
+  }catch(e){
+    chatBox.lastChild.remove();
+    addMessage("ai","Error: "+e.message+" — API key check karo.");
+  }
+
+  sendBtn.disabled=false;
+}
+
+async function callGemini(prompt){
+  const url="https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key="+apiKey;
+
+  const body={
+    contents:[
+      {
+        parts:[
+          {
+            text:
+            "You are Benix AI, a helpful premium AI assistant. Reply clearly, friendly, and professionally. Use markdown when useful. User: "+prompt
+          }
+        ]
+      }
+    ],
+    generationConfig:{
+      temperature:0.8,
+      maxOutputTokens:1200
+    }
+  };
+
+  const res=await fetch(url,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify(body)
+  });
+
+  const data=await res.json();
+
+  if(!res.ok){
+    throw new Error(data.error?.message || "Gemini API failed");
+  }
+
+  return data.candidates?.[0]?.content?.parts?.[0]?.text || "No response received.";
+}
+
+function startVoice(){
+  const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SpeechRecognition){
+    toast("Voice Chrome browser mein supported hota hai");
+    return;
+  }
+
+  const rec=new SpeechRecognition();
+  rec.lang="en-US";
+  rec.interimResults=false;
+  rec.onstart=()=>toast("Listening...");
+  rec.onresult=(e)=>{
+    input.value=e.results[0][0].transcript;
+    input.focus();
+  };
+  rec.onerror=()=>toast("Voice error");
+  rec.start();
+}
+</script>
+</body>
+</html>
