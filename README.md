@@ -1,2 +1,2 @@
-# Benix-AI
-Benix ai - smart ai assistant 
+# Faltu-Ai
+Faltu ai - smart ai assistant 
